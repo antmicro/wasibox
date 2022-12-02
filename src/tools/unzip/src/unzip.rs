@@ -24,6 +24,7 @@ pub fn unzip(args: Args) -> io::Result<()> {
                 .index(1)
         ).get_matches_from(args);
     let filepath: PathBuf = PathBuf::from(matches.get_one::<String>("FILE").unwrap());
+    // TODO: for some reason it is always true, it may be a bug in clap, maybe we should downgrade
     let quiet = matches.contains_id("quiet");
     if !filepath.is_file() {
         return Err(io::Error::new(io::ErrorKind::InvalidInput, format!("Cannot find or open {}", filepath.display())));
