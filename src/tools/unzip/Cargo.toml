@@ -1,0 +1,11 @@
+[package]
+name = "unzip"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+path = "src/unzip.rs"
+
+[dependencies]
+clap = { version = "4.0.29", features = ["cargo"] }
+zip = "0.5.13"
