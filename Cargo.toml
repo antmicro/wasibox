@@ -5,4 +5,5 @@ edition = "2021"
 
 [dependencies]
 lazy_static = "1.4.0"
+wasi_ext_lib = { git = "https://github.com/antmicro/wasi_ext_lib.git", branch = "main", features = ["hterm"] }
 unzip = { version = "0.1.0", package = "unzip", path = "src/tools/unzip" }
