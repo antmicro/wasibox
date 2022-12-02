@@ -1,13 +1,15 @@
 use std::io;
 use std::fs;
+use std::env::Args;
 use std::path::PathBuf;
 
 use clap::{Arg, command};
 
 use zip::ZipArchive;
 
-pub fn unzip() -> io::Result<()> {
+pub fn unzip(args: Args) -> io::Result<()> {
     let matches = command!()
+        .no_binary_name(true)
         .arg(
             Arg::new("quiet")
                 .help("quiet mode")
@@ -20,7 +22,7 @@ pub fn unzip() -> io::Result<()> {
                 .help("Archive to decompress")
                 .required(true)
                 .index(1)
-        ).get_matches();
+        ).get_matches_from(args);
     let filepath: PathBuf = PathBuf::from(matches.get_one::<String>("FILE").unwrap());
     let quiet = matches.contains_id("quiet");
     if !filepath.is_file() {
