@@ -180,6 +180,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "hexdump"
+version = "0.1.0"
+
+[[package]]
 name = "io-lifetimes"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -454,6 +458,7 @@ dependencies = [
 name = "wasibox"
 version = "0.1.0"
 dependencies = [
+ "hexdump",
  "lazy_static",
  "unzip",
  "wasi_ext_lib",
