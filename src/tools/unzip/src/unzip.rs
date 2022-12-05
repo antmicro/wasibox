@@ -3,7 +3,7 @@ use std::fs;
 use std::env::Args;
 use std::path::PathBuf;
 
-use clap::{Arg, command};
+use clap::{Arg, ArgAction, command};
 
 use zip::ZipArchive;
 
@@ -15,7 +15,8 @@ pub fn unzip(args: Args) -> io::Result<()> {
                 .help("quiet mode")
                 .short('q')
                 .long("quiet")
-                .num_args(0)
+                .action(ArgAction::SetTrue)
+
         )
         .arg(
             Arg::new("FILE")
@@ -25,7 +26,7 @@ pub fn unzip(args: Args) -> io::Result<()> {
         ).get_matches_from(args);
     let filepath: PathBuf = PathBuf::from(matches.get_one::<String>("FILE").unwrap());
     // TODO: for some reason it is always true, it may be a bug in clap, maybe we should downgrade
-    let quiet = matches.contains_id("quiet");
+    let quiet = matches.get_flag("quiet");
     if !filepath.is_file() {
         return Err(io::Error::new(io::ErrorKind::InvalidInput, format!("Cannot find or open {}", filepath.display())));
     }
