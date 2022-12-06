@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 lazy_static = "1.4.0"
-wasi_ext_lib = { git = "https://github.com/antmicro/wasi_ext_lib.git", branch = "main", features = ["hterm"] }
+wasi_ext_lib = { git = "https://github.com/antmicro/wasi_ext_lib.git", branch = "main" }
 unzip = { version = "0.1.0", package = "unzip", path = "src/tools/unzip" }
 hexdump = { version = "0.1.0", package = "hexdump", path = "src/tools/hexdump" }
 imgcat = { version = "0.1.0", package = "imgcat", path = "src/tools/imgcat" }
