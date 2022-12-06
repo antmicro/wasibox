@@ -9,3 +9,4 @@ wasi_ext_lib = { git = "https://github.com/antmicro/wasi_ext_lib.git", branch = 
 unzip = { version = "0.1.0", package = "unzip", path = "src/tools/unzip" }
 hexdump = { version = "0.1.0", package = "hexdump", path = "src/tools/hexdump" }
 imgcat = { version = "0.1.0", package = "imgcat", path = "src/tools/imgcat" }
+purge = { version = "0.1.0", package = "purge", path = "src/tools/purge" }

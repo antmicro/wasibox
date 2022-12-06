@@ -9,6 +9,7 @@ lazy_static! {
         m.insert("unzip", unzip::unzip);
         m.insert("hexdump", hexdump::hexdump);
         m.insert("imgcat", imgcat::imgcat);
+        m.insert("purge", purge::purge);
         m
     };
 
