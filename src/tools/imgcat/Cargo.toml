@@ -1,0 +1,10 @@
+[package]
+name = "imgcat"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+path = "src/imgcat.rs"
+
+[dependencies.iterm2]
+git = "https://github.com/Noskcaj19/iterm2"

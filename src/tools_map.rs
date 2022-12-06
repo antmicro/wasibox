@@ -8,6 +8,7 @@ lazy_static! {
         let mut m: HashMap<&'static str, fn(Args) -> Result<()>> = HashMap::new();
         m.insert("unzip", unzip::unzip);
         m.insert("hexdump", hexdump::hexdump);
+        m.insert("imgcat", imgcat::imgcat);
         m
     };
 
