@@ -10,6 +10,7 @@ lazy_static! {
         m.insert("hexdump", hexdump::hexdump);
         m.insert("imgcat", imgcat::imgcat);
         m.insert("purge", purge::purge);
+        m.insert("tree", tree::tree);
         m
     };
 
