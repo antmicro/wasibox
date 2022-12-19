@@ -37,5 +37,7 @@ pub fn purge(mut _args: Args) -> io::Result<()> {
                 fs::remove_file(&path_obj)
         } { eprintln!("Could not remove {}: {:?}", &path_obj.display(), e); }
     }
+    #[cfg(target_os = "wasi")]
+    let _ = wasi_ext_lib::clean_inodes();
     Ok(())
 }
