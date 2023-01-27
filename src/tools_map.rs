@@ -17,6 +17,7 @@ lazy_static! {
         m.insert("imgcat", imgcat::imgcat);
         m.insert("purge", purge::purge);
         m.insert("tree", tree::tree);
+        m.insert("tar", tar_wasi::tar);
         m
     };
 }
