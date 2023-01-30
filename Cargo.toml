@@ -1,5 +1,5 @@
 [package]
-authors = [ "Antmicro <antmicro.com>" ]
+author_email='contact@antmicro.com'
 name = "wasibox"
 version = "0.1.0"
 edition = "2021"
