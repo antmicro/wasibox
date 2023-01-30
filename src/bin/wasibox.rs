@@ -12,7 +12,7 @@ use wasibox::tools_map::TOOLS_MAP;
 fn main() -> io::Result<()> {
     let mut args = env::args();
     let _ = wasi_ext_lib::chdir(
-        &match wasi_ext_lib::getcwd() {
+        match wasi_ext_lib::getcwd() {
             Ok(p) => p,
             Err(_) => String::from("/")
         });
@@ -29,11 +29,11 @@ fn main() -> io::Result<()> {
             ) {
                 x(args)
             } else {
-                return Err(io::Error::new(io::ErrorKind::InvalidInput, "No such tool"))
+                Err(io::Error::new(io::ErrorKind::InvalidInput, "No such tool"))
             }
         }
         None => {
-            return Err(io::Error::new(io::ErrorKind::InvalidInput, "Missing command line arguments"))
+            Err(io::Error::new(io::ErrorKind::InvalidInput, "Missing command line arguments"))
         }
     }
 }
