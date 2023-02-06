@@ -4,18 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-use std::io;
 use std::env;
+use std::io;
 
 use wasibox::tools_map::TOOLS_MAP;
 
 fn main() -> io::Result<()> {
     let mut args = env::args();
-    let _ = wasi_ext_lib::chdir(
-        match wasi_ext_lib::getcwd() {
-            Ok(p) => p,
-            Err(_) => String::from("/")
-        });
+    let _ = wasi_ext_lib::chdir(match wasi_ext_lib::getcwd() {
+        Ok(p) => p,
+        Err(_) => String::from("/"),
+    });
     match args.next() {
         Some(s) => {
             if let Some(x) = TOOLS_MAP.get(
@@ -23,17 +22,23 @@ fn main() -> io::Result<()> {
                     if let Some(tool) = args.next() {
                         tool
                     } else {
-                        return Err(io::Error::new(io::ErrorKind::InvalidInput, "Missing tool name"));
+                        return Err(io::Error::new(
+                            io::ErrorKind::InvalidInput,
+                            "Missing tool name",
+                        ));
                     }
-                } else { s }[..]
+                } else {
+                    s
+                }[..],
             ) {
                 x(args)
             } else {
                 Err(io::Error::new(io::ErrorKind::InvalidInput, "No such tool"))
             }
         }
-        None => {
-            Err(io::Error::new(io::ErrorKind::InvalidInput, "Missing command line arguments"))
-        }
+        None => Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "Missing command line arguments",
+        )),
     }
 }
