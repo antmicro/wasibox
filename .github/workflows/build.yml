@@ -40,3 +40,22 @@ jobs:
             echo "The rust sources are not formatted properly. Please fix it."
             exit 1
           fi
+      - name: Setup Rust toolchain
+        run: |
+          git clone https://github.com/rust-lang/rust.git -b beta
+          cd rust
+          git apply ../canonicalize.patch
+          mkdir tmp
+          cd tmp
+          sudo ../src/ci/docker/host-x86_64/dist-various-2/build-wasi-toolchain.sh
+          cd ..
+          ./configure --target=wasm32-wasi --disable-docs --set target.wasm32-wasi.wasi-root=/wasm32-wasi --enable-lld --tools=cargo
+          ./x.py build --target x86_64-unknown-linux-gnu --target wasm32-wasi --stage 2
+          source $HOME/.cargo/env
+          rustup toolchain link stage2 "$(pwd)/build/x86_64-unknown-linux-gnu/stage2"
+          cargo --version
+      - name: Build wasm32-wasi
+        run: |
+          source $HOME/.cargo/env
+          export CC="${WASI_SDK_PATH}/bin/clang --sysroot=${WASI_SDK_PATH}/share/wasi-sysroot"
+          cargo +stage2 build --target wasm32-wasi --release
