@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+use lazy_static::lazy_static;
 use std::collections::HashMap;
 use std::env::Args;
 use std::io::Result;
-use lazy_static::lazy_static;
 
 lazy_static! {
     pub static ref TOOLS_MAP: HashMap<&'static str, fn(Args) -> Result<()>> = {
@@ -19,5 +19,4 @@ lazy_static! {
         m.insert("tree", tree::tree);
         m
     };
-
 }
