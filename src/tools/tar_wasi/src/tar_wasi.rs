@@ -80,6 +80,7 @@ pub fn tar(args: env::Args) -> io::Result<()> {
     let name = env::args().next().unwrap_or(env!("CARGO_PKG_NAME").to_string());
     let matches = Command::new(name)
         .version(env!("CARGO_PKG_VERSION"))
+        .no_binary_name(true)
         .author("Antmicro <www.antmicro.com>")
         .arg(
             Arg::new("file")
