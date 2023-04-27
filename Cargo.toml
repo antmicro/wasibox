@@ -13,3 +13,4 @@ imgcat = { version = "0.1.0", package = "imgcat", path = "src/tools/imgcat" }
 purge = { version = "0.1.0", package = "purge", path = "src/tools/purge" }
 tree = { version = "0.1.0", package = "tree", path = "src/tools/tree" }
 tar_wasi = { version = "0.1.0", package = "tar_wasi", path = "src/tools/tar_wasi" }
+kill = { version = "0.1.0", package = "kill", path = "src/tools/kill" }

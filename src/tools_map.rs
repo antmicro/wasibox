@@ -18,6 +18,7 @@ lazy_static! {
         m.insert("purge", purge::purge);
         m.insert("tree", tree::tree);
         m.insert("tar", tar_wasi::tar);
+        m.insert("kill", kill::kill);
         m
     };
 }
