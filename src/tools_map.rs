@@ -9,9 +9,11 @@ use std::collections::HashMap;
 use std::env::Args;
 use std::io::Result;
 
+pub type AppletType = fn(Args) -> Result<()>;
+
 lazy_static! {
-    pub static ref TOOLS_MAP: HashMap<&'static str, fn(Args) -> Result<()>> = {
-        let mut m: HashMap<&'static str, fn(Args) -> Result<()>> = HashMap::new();
+    pub static ref TOOLS_MAP: HashMap<&'static str, AppletType> = {
+        let mut m: HashMap<&'static str, AppletType> = HashMap::new();
         m.insert("unzip", unzip::unzip);
         m.insert("hexdump", hexdump::hexdump);
         m.insert("imgcat", imgcat::imgcat);

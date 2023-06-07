@@ -6,8 +6,32 @@
 
 use std::env;
 use std::io;
+use std::process;
 
+pub use wasibox::tools_map::AppletType;
 use wasibox::tools_map::TOOLS_MAP;
+
+fn get_applet(args: &mut env::Args) -> Result<&AppletType, &'static str> {
+    let command = if let Some(cmd) = args.next() {
+        if cmd == env!("CARGO_PKG_NAME") || cmd == format!("{}.wasm", env!("CARGO_PKG_NAME")) {
+            if let Some(cmd_) = args.next() {
+                cmd_
+            } else {
+                return Err("Missing tool name");
+            }
+        } else {
+            cmd
+        }
+    } else {
+        return Err("Missing command line arguments");
+    };
+
+    if let Some(applet) = TOOLS_MAP.get(&command[..]) {
+        Ok(applet)
+    } else {
+        Err("No such tool")
+    }
+}
 
 fn main() -> io::Result<()> {
     let mut args = env::args();
@@ -15,30 +39,15 @@ fn main() -> io::Result<()> {
         Ok(p) => p,
         Err(_) => String::from("/"),
     });
-    match args.next() {
-        Some(s) => {
-            if let Some(x) = TOOLS_MAP.get(
-                &if s == env!("CARGO_PKG_NAME") || s == format!("{}.wasm", env!("CARGO_PKG_NAME")) {
-                    if let Some(tool) = args.next() {
-                        tool
-                    } else {
-                        return Err(io::Error::new(
-                            io::ErrorKind::InvalidInput,
-                            "Missing tool name",
-                        ));
-                    }
-                } else {
-                    s
-                }[..],
-            ) {
-                x(args)
-            } else {
-                Err(io::Error::new(io::ErrorKind::InvalidInput, "No such tool"))
-            }
+
+    match get_applet(&mut args) {
+        Ok(applet) => applet(args),
+        Err(e) => {
+            eprintln!("{}\n", e);
+            eprintln!("USAGE: {} [tool [arguments]]", env!("CARGO_PKG_NAME"));
+            eprintln!("   or: tool [arguments]\n");
+            eprintln!("Available tools are: {:?}", TOOLS_MAP.keys());
+            process::exit(1);
         }
-        None => Err(io::Error::new(
-            io::ErrorKind::InvalidInput,
-            "Missing command line arguments",
-        )),
     }
 }
