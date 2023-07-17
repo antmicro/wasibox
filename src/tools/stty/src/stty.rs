@@ -10,7 +10,7 @@ pub fn stty(args: env::Args) -> io::Result<()> {
 
             if let Err(errno) = match arg_ {
                 "raw" => wasi_ext_lib::ioctl(0, wasi_ext_lib::IoctlNum::SetRaw, Some(&mut on)),
-                "echo" => wasi_ext_lib::ioctl(0, wasi_ext_lib::IoctlNum::SetRaw, Some(&mut on)),
+                "echo" => wasi_ext_lib::ioctl(0, wasi_ext_lib::IoctlNum::SetEcho, Some(&mut on)),
                 "size" => {
                     let mut size = [0i32; 2];
                     let result = wasi_ext_lib::ioctl(
