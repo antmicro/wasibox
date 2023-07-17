@@ -694,7 +694,7 @@ checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
 [[package]]
 name = "wasi_ext_lib"
 version = "0.1.0"
-source = "git+https://github.com/antmicro/wasi_ext_lib.git?branch=main#515114b90c63b70214269a59b778537880f56930"
+source = "git+https://github.com/antmicro/wasi_ext_lib.git?branch=main#44ac50537a6982ca18285b03494e04cdf43c9942"
 dependencies = [
  "bindgen",
  "wasi 0.11.0+wasi-snapshot-preview1",
