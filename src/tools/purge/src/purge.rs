@@ -25,7 +25,7 @@ fn traverse(path: &PathBuf, paths: &mut Vec<PathBuf>) -> io::Result<()>{
 
 pub fn purge(mut _args: Args) -> io::Result<()> {
     // remove all mounting points before purging
-    wasi_ext_lib::spawn("/usr/bin/umount", &["-a"], &HashMap::new(), false, Vec::new()).unwrap();
+    wasi_ext_lib::spawn("/usr/bin/umount", &["-a"], &HashMap::new(), false, &[]).unwrap();
 
 
     println!("Removing /filesystem-initiated");
