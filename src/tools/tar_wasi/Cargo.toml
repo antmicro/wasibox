@@ -14,7 +14,7 @@ flate2 = "1.0.17"
 bzip2 = "0.4"
 
 [target.'cfg(target_os = "wasi")'.dependencies]
-wasi_ext_lib = { git = "https://github.com/antmicro/wasi_ext_lib.git", branch = "main" }
+wasi_ext_lib = { git = "https://github.com/antmicro/wasi_ext_lib.git", branch = "47550-mount-syscall" }
 
 [target.'cfg(not(target_os = "wasi"))'.dependencies]
 atty = "0.2"

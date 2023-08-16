@@ -11,4 +11,4 @@ path = "src/stty.rs"
 clap = "3.2.22"
 
 [target.'cfg(target_os = "wasi")'.dependencies]
-wasi_ext_lib = { git = "https://github.com/antmicro/wasi_ext_lib.git", branch = "main", features = ["hterm"] }
+wasi_ext_lib = { git = "https://github.com/antmicro/wasi_ext_lib.git", branch = "47550-mount-syscall", features = ["hterm"] }

@@ -22,6 +22,7 @@ lazy_static! {
         m.insert("tar", tar_wasi::tar);
         m.insert("kill", kill::kill);
         m.insert("stty", stty::stty);
+        m.insert("mount", mount::mount);
         m
     };
 }
