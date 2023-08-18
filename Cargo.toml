@@ -1,12 +1,16 @@
 [package]
-author_email='contact@antmicro.com'
 name = "wasibox"
 version = "0.1.0"
 edition = "2021"
 
+[workspace.package]
+authors = ["Antmicro <www.antmicro.com>"]
+
+[workspace.dependencies]
+wasi_ext_lib = { git = "https://github.com/antmicro/wasi_ext_lib.git", branch = "47550-mount-syscall" }
+
 [dependencies]
 lazy_static = "1.4.0"
-wasi_ext_lib = { git = "https://github.com/antmicro/wasi_ext_lib.git", branch = "47550-mount-syscall" }
 unzip = { version = "0.1.0", package = "unzip", path = "src/tools/unzip" }
 hexdump = { version = "0.1.0", package = "hexdump", path = "src/tools/hexdump" }
 imgcat = { version = "0.1.0", package = "imgcat", path = "src/tools/imgcat" }
@@ -17,3 +21,4 @@ kill = { version = "0.1.0", package = "kill", path = "src/tools/kill" }
 stty = { version = "0.1.0", package = "stty", path = "src/tools/stty" }
 mount = { version = "0.1.0", package = "mount", path = "src/tools/mount" }
 umount = { version = "0.1.0", package = "umount", path = "src/tools/umount" }
+wasi_ext_lib = { workspace = true }
