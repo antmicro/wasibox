@@ -1,0 +1,14 @@
+[package]
+author = "Antmicro <www.antmicro.com>"
+name = "umount"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+path = "src/umount.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+
+[target.'cfg(target_os = "wasi")'.dependencies]
+wasi_ext_lib = { git = "https://github.com/antmicro/wasi_ext_lib.git", branch = "47550-mount-syscall" }

@@ -23,6 +23,7 @@ lazy_static! {
         m.insert("kill", kill::kill);
         m.insert("stty", stty::stty);
         m.insert("mount", mount::mount);
+        m.insert("umount", umount::umount);
         m
     };
 }

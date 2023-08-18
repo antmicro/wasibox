@@ -699,6 +699,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "umount"
+version = "0.1.0"
+dependencies = [
+ "clap 4.3.24",
+ "wasi_ext_lib",
+]
+
+[[package]]
 name = "unicode-ident"
 version = "1.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -752,6 +760,7 @@ dependencies = [
  "stty",
  "tar_wasi",
  "tree",
+ "umount",
  "unzip",
  "wasi_ext_lib",
 ]

@@ -16,3 +16,4 @@ tar_wasi = { version = "0.1.0", package = "tar_wasi", path = "src/tools/tar_wasi
 kill = { version = "0.1.0", package = "kill", path = "src/tools/kill" }
 stty = { version = "0.1.0", package = "stty", path = "src/tools/stty" }
 mount = { version = "0.1.0", package = "mount", path = "src/tools/mount" }
+umount = { version = "0.1.0", package = "umount", path = "src/tools/umount" }
