@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+use std::env;
 use std::fs::File;
 use std::io;
 use std::io::BufRead;
-use std::env;
 
 use clap::Parser;
 
@@ -19,7 +19,7 @@ struct CliArgs {
     #[arg(short, long)]
     options: Option<String>,
     source: String,
-    target: Option<String>
+    target: Option<String>,
 }
 
 pub fn mount(args: env::Args) -> io::Result<()> {
@@ -51,5 +51,6 @@ pub fn mount(args: env::Args) -> io::Result<()> {
         &args.types.unwrap_or("".to_string()),
         0u64,
         &args.options.unwrap_or("".to_string()),
-    ).map_err(io::Error::from_raw_os_error)
+    )
+    .map_err(io::Error::from_raw_os_error)
 }

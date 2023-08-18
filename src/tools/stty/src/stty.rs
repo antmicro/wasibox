@@ -12,7 +12,7 @@ pub fn stty(args: env::Args) -> io::Result<()> {
         .map(|arg: String| -> io::Result<()> {
             let mut on = !arg.starts_with('-');
 
-            let arg_: &str = if on { &arg  } else { &arg[1..] };
+            let arg_: &str = if on { &arg } else { &arg[1..] };
 
             if let Err(errno) = match arg_ {
                 "raw" => wasi_ext_lib::ioctl(0, wasi_ext_lib::IoctlNum::SetRaw, Some(&mut on)),
@@ -24,7 +24,7 @@ pub fn stty(args: env::Args) -> io::Result<()> {
                         wasi_ext_lib::IoctlNum::GetScreenSize,
                         Some(&mut size),
                     );
-                    if let Ok(_) = result {
+                    if result.is_ok() {
                         println!("{} {}", size[0], size[1]);
                     }
                     result

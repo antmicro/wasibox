@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-use std::io;
 use std::env::Args;
+use std::io;
 
 pub fn imgcat(mut args: Args) -> io::Result<()> {
     if let Some(arg) = args.next() {
@@ -16,6 +16,9 @@ pub fn imgcat(mut args: Args) -> io::Result<()> {
             .preserve_aspect_ratio(true)
             .show()
     } else {
-        Err(io::Error::new(io::ErrorKind::InvalidInput, "usage: imgcat <IMAGE>"))
+        Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "usage: imgcat <IMAGE>",
+        ))
     }
 }

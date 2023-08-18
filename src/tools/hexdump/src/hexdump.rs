@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-use std::io;
-use std::fs;
 use std::env::Args;
+use std::fs;
+use std::io;
 
 pub fn hexdump(mut args: Args) -> io::Result<()> {
     let contents = fs::read(match args.next() {
@@ -14,7 +14,8 @@ pub fn hexdump(mut args: Args) -> io::Result<()> {
         None => {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
-                "hexdump: help: hexdump <filename>"));
+                "hexdump: help: hexdump <filename>",
+            ));
         }
     })?;
     let len = contents.len();
@@ -43,7 +44,7 @@ pub fn hexdump(mut args: Args) -> io::Result<()> {
             print!(" |");
             for c in v.iter_mut().take(count) {
                 if (0x20..0x7e).contains(&(*c as u8)) {
-                    print!("{}", *c as char);
+                    print!("{}", *c);
                     *c = '.';
                 } else {
                     print!(".");

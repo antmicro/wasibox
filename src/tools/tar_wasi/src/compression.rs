@@ -4,39 +4,45 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-use crate::constants;
+use crate::CliCompression;
 
+use std::ffi::OsStr;
 use std::io;
 use std::path::Path;
-use std::ffi::OsStr;
-
-use clap::ArgMatches;
 
 #[derive(Copy, Clone, Debug)]
 pub enum Compression {
     Gzip,
     Bzip,
-    None
+    None,
 }
 
-impl Compression {
-    pub fn from_cli(m: &ArgMatches) -> Compression {
+impl TryFrom<&CliCompression> for Compression {
+    type Error = ();
+
+    fn try_from(comp: &CliCompression) -> Result<Compression, Self::Error> {
         // TODO: is there a way to do it without if-else chain
-        if m.is_present(constants::BZ2_MATCH) {
-            Compression::Bzip
-        } else if m.is_present(constants::GZ_MATCH) {
-            Compression::Gzip
+        if comp.gzip && comp.bzip2 {
+            Err(())
+        } else if comp.gzip {
+            Ok(Compression::Gzip)
+        } else if comp.bzip2 {
+            Ok(Compression::Bzip)
         } else {
-            Compression::None
+            Ok(Compression::None)
         }
     }
-
+}
+impl Compression {
     pub fn from_extensions(path: &Path) -> io::Result<Compression> {
         match path.extension().and_then(OsStr::to_str) {
             Some("bz2") => Ok(Compression::Bzip),
             Some("gz") => Ok(Compression::Gzip),
             Some("tar") | None => Ok(Compression::None),
-            Some(_) => Err(io::Error::new(io::ErrorKind::InvalidInput, "Unknown compression"))
+            Some(_) => Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "Unknown compression",
+            )),
         }
     }
 }

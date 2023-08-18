@@ -7,5 +7,5 @@ edition = "2021"
 path = "src/mount.rs"
 
 [dependencies]
-clap = { version = "4", features = ["derive"] }
+clap = { workspace = true }
 wasi_ext_lib = { workspace = true }

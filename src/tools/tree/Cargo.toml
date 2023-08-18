@@ -7,4 +7,4 @@ edition = "2021"
 path = "src/tree.rs"
 
 [dependencies]
-clap = "3"
+clap = { workspace = true }

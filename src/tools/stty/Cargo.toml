@@ -7,5 +7,4 @@ edition = "2021"
 path = "src/stty.rs"
 
 [dependencies]
-clap = "3.2.22"
 wasi_ext_lib = { workspace = true }
