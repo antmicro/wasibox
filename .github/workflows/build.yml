@@ -42,9 +42,11 @@ jobs:
           fi
       - name: Setup Rust toolchain
         run: |
+          dir=$(pwd)
+          cd /opt
           git clone https://github.com/rust-lang/rust.git -b beta
           cd rust
-          git apply ../canonicalize.patch
+          git apply "$dir/canonicalize.patch"
           mkdir tmp
           cd tmp
           sudo ../src/ci/docker/host-x86_64/dist-various-2/build-wasi-toolchain.sh
