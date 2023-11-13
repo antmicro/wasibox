@@ -9,12 +9,107 @@ use std::io;
 use std::os::fd::AsRawFd;
 
 use wasi_ext_lib::{tcgetattr, tcsetattr, tcgetwinsize, termios, Fd, TcsetattrAction};
+use termios::tcflag_t;
+
+fn print_size() -> io::Result<()> {
+    match tcgetwinsize(io::stdin().as_raw_fd() as Fd) {
+        Ok(size) => println!("rows {}; columns {};", size.ws_row, size.ws_col),
+        Err(e) => return Err(io::Error::from_raw_os_error(e))
+    }
+
+    Ok(())
+}
+
+fn print_termios(termios_p: &termios::termios) -> io::Result<()> {
+    fn is_flag_set(field: tcflag_t, flag: tcflag_t) -> &'static str {
+        if (field & flag) != 0 {""} else {"-"}
+    }
+
+    fn get_csn(field: tcflag_t) -> &'static str {
+        match field & termios::CSIZE {
+            termios::CS5 => "cs5",
+            termios::CS6 => "cs6",
+            termios::CS7 => "cs7",
+            termios::CS8 => "cs8",
+            _ => unreachable!()
+        }
+    }
+
+    // terminal size
+    print_size()?;
+
+    // termios.c_iflag
+    println!(
+        "{}ignbrk {}brkint {}ignpar {}parmrk {}inpck {}istrip {}inlcr {}igncr {}icrnl {}iuclc {}ixon {}ixany {}ixoff {}imaxbel {}iutf8",
+        is_flag_set(termios_p.c_iflag, termios::IGNBRK),
+        is_flag_set(termios_p.c_iflag, termios::BRKINT),
+        is_flag_set(termios_p.c_iflag, termios::IGNBRK),
+        is_flag_set(termios_p.c_iflag, termios::PARMRK),
+        is_flag_set(termios_p.c_iflag, termios::INPCK),
+        is_flag_set(termios_p.c_iflag, termios::ISTRIP),
+        is_flag_set(termios_p.c_iflag, termios::INLCR),
+        is_flag_set(termios_p.c_iflag, termios::IGNCR),
+        is_flag_set(termios_p.c_iflag, termios::ICRNL),
+        is_flag_set(termios_p.c_iflag, termios::IUCLC),
+        is_flag_set(termios_p.c_iflag, termios::IXON),
+        is_flag_set(termios_p.c_iflag, termios::IXANY),
+        is_flag_set(termios_p.c_iflag, termios::IXOFF),
+        is_flag_set(termios_p.c_iflag, termios::IMAXBEL),
+        is_flag_set(termios_p.c_iflag, termios::IUTF8)
+    );
+
+    // termios.c_oflag
+    println!(
+        "{}opost {}olcuc {}onlcr {}ocrnl {}onocr {}onlret {}ofill {}ofdel",
+        is_flag_set(termios_p.c_oflag, termios::OPOST),
+        is_flag_set(termios_p.c_oflag, termios::OLCUC),
+        is_flag_set(termios_p.c_oflag, termios::ONLCR),
+        is_flag_set(termios_p.c_oflag, termios::OCRNL),
+        is_flag_set(termios_p.c_oflag, termios::ONOCR),
+        is_flag_set(termios_p.c_oflag, termios::ONLRET),
+        is_flag_set(termios_p.c_oflag, termios::OFILL),
+        is_flag_set(termios_p.c_oflag, termios::OFDEL)
+    );
+
+    // termios.c_cflag
+    println!(
+        "{} {}cstopb {}cread {}parenb {}parodd {}hupcl {}clocal",
+        get_csn(termios_p.c_cflag),
+        is_flag_set(termios_p.c_cflag, termios::CSTOPB),
+        is_flag_set(termios_p.c_cflag, termios::CREAD),
+        is_flag_set(termios_p.c_cflag, termios::PARENB),
+        is_flag_set(termios_p.c_cflag, termios::PARODD),
+        is_flag_set(termios_p.c_cflag, termios::HUPCL),
+        is_flag_set(termios_p.c_cflag, termios::CLOCAL)
+    );
+
+    // termios.c_lflag
+    println!(
+        "{}isig {}icanon {}echo {}echoe {}echok {}echonl {}noflsh {}tostop {}iexten",
+        is_flag_set(termios_p.c_lflag, termios::ISIG),
+        is_flag_set(termios_p.c_lflag, termios::ICANON),
+        is_flag_set(termios_p.c_lflag, termios::ECHO),
+        is_flag_set(termios_p.c_lflag, termios::ECHOE),
+        is_flag_set(termios_p.c_lflag, termios::ECHOK),
+        is_flag_set(termios_p.c_lflag, termios::ECHONL),
+        is_flag_set(termios_p.c_lflag, termios::NOFLSH),
+        is_flag_set(termios_p.c_lflag, termios::TOSTOP),
+        is_flag_set(termios_p.c_lflag, termios::IEXTEN)
+    );
+
+    Ok(())
+}
 
 pub fn stty(args: env::Args) -> io::Result<()> {
     let mut termios = match tcgetattr(io::stdin().as_raw_fd() as Fd) {
         Ok(termios) => termios,
         Err(e) => return Err(io::Error::from_raw_os_error(e)),
     };
+
+    if args.len() == 0 {
+        print_termios(&termios)?;
+        return Ok(())
+    }
 
     for arg in args {
         let on = !arg.starts_with('-');
@@ -108,10 +203,7 @@ pub fn stty(args: env::Args) -> io::Result<()> {
                 }
             }
             "size" => {
-                match tcgetwinsize(io::stdin().as_raw_fd() as Fd) {
-                    Ok(size) => println!("Rows: {}, columns: {}", size.ws_row, size.ws_col),
-                    Err(e) => return Err(io::Error::from_raw_os_error(e))
-                }
+                print_size()?;
             }
             _ => {
                 return Err(io::Error::new(
