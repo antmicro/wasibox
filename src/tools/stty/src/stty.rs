@@ -11,13 +11,11 @@ use std::os::fd::AsRawFd;
 use wasi_ext_lib::{tcgetattr, tcsetattr, tcgetwinsize, termios, Fd, TcsetattrAction};
 use termios::tcflag_t;
 
-fn print_size() -> io::Result<()> {
+fn get_size() -> io::Result<(usize, usize)> {
     match tcgetwinsize(io::stdin().as_raw_fd() as Fd) {
-        Ok(size) => println!("rows {}; columns {};", size.ws_row, size.ws_col),
-        Err(e) => return Err(io::Error::from_raw_os_error(e))
+        Ok(size) => Ok((size.ws_row as usize, size.ws_col as usize)),
+        Err(e) => Err(io::Error::from_raw_os_error(e))
     }
-
-    Ok(())
 }
 
 fn print_termios(termios_p: &termios::termios) -> io::Result<()> {
@@ -35,8 +33,8 @@ fn print_termios(termios_p: &termios::termios) -> io::Result<()> {
         }
     }
 
-    // terminal size
-    print_size()?;
+    let (rows, columns) = get_size()?;
+    println!("rows {rows}; columns {columns};");
 
     // termios.c_iflag
     println!(
@@ -203,7 +201,8 @@ pub fn stty(args: env::Args) -> io::Result<()> {
                 }
             }
             "size" => {
-                print_size()?;
+                let (rows, columns) = get_size()?;
+                println!("{rows} {columns}");
             }
             _ => {
                 return Err(io::Error::new(
