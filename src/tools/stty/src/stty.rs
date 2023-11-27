@@ -8,19 +8,23 @@ use std::env;
 use std::io;
 use std::os::fd::AsRawFd;
 
-use wasi_ext_lib::{tcgetattr, tcsetattr, tcgetwinsize, termios, Fd, TcsetattrAction};
 use termios::tcflag_t;
+use wasi_ext_lib::{tcgetattr, tcgetwinsize, tcsetattr, termios, Fd, TcsetattrAction};
 
 fn get_size() -> io::Result<(usize, usize)> {
     match tcgetwinsize(io::stdin().as_raw_fd() as Fd) {
         Ok(size) => Ok((size.ws_row as usize, size.ws_col as usize)),
-        Err(e) => Err(io::Error::from_raw_os_error(e))
+        Err(e) => Err(io::Error::from_raw_os_error(e)),
     }
 }
 
 fn print_termios(termios_p: &termios::termios) -> io::Result<()> {
     fn is_flag_set(field: tcflag_t, flag: tcflag_t) -> &'static str {
-        if (field & flag) != 0 {""} else {"-"}
+        if (field & flag) != 0 {
+            ""
+        } else {
+            "-"
+        }
     }
 
     fn get_csn(field: tcflag_t) -> &'static str {
@@ -29,7 +33,7 @@ fn print_termios(termios_p: &termios::termios) -> io::Result<()> {
             termios::CS6 => "cs6",
             termios::CS7 => "cs7",
             termios::CS8 => "cs8",
-            _ => unreachable!()
+            _ => unreachable!(),
         }
     }
 
@@ -106,7 +110,7 @@ pub fn stty(args: env::Args) -> io::Result<()> {
 
     if args.len() == 0 {
         print_termios(&termios)?;
-        return Ok(())
+        return Ok(());
     }
 
     for arg in args {
@@ -114,7 +118,8 @@ pub fn stty(args: env::Args) -> io::Result<()> {
         let arg_: &str = if on { &arg } else { &arg[1..] };
 
         match arg_ {
-            "ignbrk" | "brkint" | "ignpar" | "parmrk" | "inpck" | "istrip" | "inlcr" | "igncr" | "icrnl" | "iuclc" | "ixon" | "ixany" | "ixoff" | "imaxbel" | "iutf8" => {
+            "ignbrk" | "brkint" | "ignpar" | "parmrk" | "inpck" | "istrip" | "inlcr" | "igncr"
+            | "icrnl" | "iuclc" | "ixon" | "ixany" | "ixoff" | "imaxbel" | "iutf8" => {
                 let flag = match arg_ {
                     "ignbrk" => termios::IGNBRK,
                     "brkint" => termios::BRKINT,
@@ -159,7 +164,8 @@ pub fn stty(args: env::Args) -> io::Result<()> {
                     termios.c_oflag &= !flag;
                 }
             }
-            "cs5" | "cs6" | "cs7" | "cs8" | "cstopb" | "cread" | "parenb" | "parodd" | "hupcl" | "clocal" => {
+            "cs5" | "cs6" | "cs7" | "cs8" | "cstopb" | "cread" | "parenb" | "parodd" | "hupcl"
+            | "clocal" => {
                 let flag = match arg_ {
                     "cs5" => termios::CS5,
                     "cs6" => termios::CS6,
@@ -180,7 +186,8 @@ pub fn stty(args: env::Args) -> io::Result<()> {
                     termios.c_cflag &= !flag;
                 }
             }
-            "isig" | "icanon" | "echo" | "echoe" | "echok" | "echonl" | "noflsh" | "tostop" | "iexten" => {
+            "isig" | "icanon" | "echo" | "echoe" | "echok" | "echonl" | "noflsh" | "tostop"
+            | "iexten" => {
                 let flag = match arg_ {
                     "isig" => termios::ISIG,
                     "icanon" => termios::ICANON,
@@ -212,11 +219,11 @@ pub fn stty(args: env::Args) -> io::Result<()> {
             }
         }
     }
-    
+
     if let Err(e) = tcsetattr(
         io::stdin().as_raw_fd() as Fd,
         TcsetattrAction::TCSANOW,
-        &termios
+        &termios,
     ) {
         Err(io::Error::from_raw_os_error(e))
     } else {
