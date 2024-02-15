@@ -24,6 +24,7 @@ lazy_static! {
         m.insert("stty", stty::stty);
         m.insert("mount", mount::mount);
         m.insert("umount", umount::umount);
+        m.insert("wget", wget::wget);
         m
     };
 }

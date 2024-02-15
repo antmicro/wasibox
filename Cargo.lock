@@ -673,6 +673,14 @@ dependencies = [
  "umount",
  "unzip",
  "wasi_ext_lib",
+ "wget",
+]
+
+[[package]]
+name = "wget"
+version = "0.1.0"
+dependencies = [
+ "clap",
 ]
 
 [[package]]
