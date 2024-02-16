@@ -8,3 +8,4 @@ path = "src/wget.rs"
 
 [dependencies]
 clap = { workspace = true }
+wasi_ext_lib = { workspace = true }
