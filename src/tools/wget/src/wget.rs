@@ -19,6 +19,8 @@ struct CliArgs {
     output_document: Option<String>,
     #[arg(short('S'), long)]
     server_response: bool,
+    #[arg(long)]
+    content_on_error: bool,
     url: String,
 }
 
@@ -31,15 +33,15 @@ pub fn wget(args: env::Args) -> io::Result<()> {
         .write(cli.url.as_bytes())?;
     let response_device = fs::File::open(format!("/dev/wget0r{}", minor))?;
 
+    let mut http_stat: i32 = 0;
+    if let Err(e) = wasi_ext_lib::ioctl(
+        response_device.as_raw_fd(),
+        wasi_ext_lib::WGETGS,
+        Some(&mut http_stat),
+    ) {
+        eprintln!("Could not retreive http status: system error {}", e);
+    }
     if cli.server_response {
-        let mut http_stat: i32 = 0;
-        if let Err(e) = wasi_ext_lib::ioctl(
-            response_device.as_raw_fd(),
-            wasi_ext_lib::WGETGS,
-            Some(&mut http_stat),
-        ) {
-            eprintln!("Could not retreive http status: system error {}", e);
-        }
         if let Err(e) =
             wasi_ext_lib::ioctl::<()>(response_device.as_raw_fd(), wasi_ext_lib::WGETRH, None)
         {
@@ -52,6 +54,11 @@ pub fn wget(args: env::Args) -> io::Result<()> {
             )?;
             println!("\n");
         }
+    }
+
+    if http_stat >= 300 && !cli.content_on_error {
+        eprintln!("ERROR {}", http_stat);
+        std::process::exit(8);
     }
 
     if let Err(e) =
