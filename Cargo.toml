@@ -1,6 +1,6 @@
 [package]
 name = "wasibox"
-version = "0.1.0"
+version = "0.1.2"
 edition = "2021"
 
 [workspace.package]
@@ -22,4 +22,5 @@ kill = { version = "0.1.0", package = "kill", path = "src/tools/kill" }
 stty = { version = "0.1.0", package = "stty", path = "src/tools/stty" }
 mount = { version = "0.1.0", package = "mount", path = "src/tools/mount" }
 umount = { version = "0.1.0", package = "umount", path = "src/tools/umount" }
+wget = { version = "0.1.0", package = "wget", path = "src/tools/wget" }
 wasi_ext_lib = { workspace = true }
