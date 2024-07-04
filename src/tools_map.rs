@@ -26,6 +26,7 @@ lazy_static! {
         m.insert("umount", umount::umount);
         m.insert("wget", wget::wget);
         m.insert("mknod", mknod::mknod);
+        m.insert("init", init::init);
         m
     };
 }

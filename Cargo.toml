@@ -7,8 +7,11 @@ edition = "2021"
 authors = ["Antmicro <www.antmicro.com>"]
 
 [workspace.dependencies]
-wasi_ext_lib = { git = "https://github.com/antmicro/wasi_ext_lib.git", branch = "main" }
+wasi = "0.11.0"
+wasi_ext_lib = { git = "https://github.com/antmicro/wasi_ext_lib.git", branch = "61992-mknod" }
 clap = { version = "4", features = ["derive"] }
+serde = { version = "1.0.203", features = ["derive"] }
+serde_json = "1.0.120"
 
 [dependencies]
 lazy_static = "1.4.0"
@@ -24,4 +27,5 @@ mount = { version = "0.1.0", package = "mount", path = "src/tools/mount" }
 umount = { version = "0.1.0", package = "umount", path = "src/tools/umount" }
 wget = { version = "0.1.0", package = "wget", path = "src/tools/wget" }
 mknod = { version = "0.1.0", package = "mknod", path = "src/tools/mknod" }
+init = { version = "0.1.0", package = "init", path = "src/tools/init" }
 wasi_ext_lib = { workspace = true }

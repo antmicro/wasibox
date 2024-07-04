@@ -1,0 +1,13 @@
+[package]
+name = "init"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+path = "src/init.rs"
+
+[dependencies]
+wasi_ext_lib = { workspace = true }
+serde_json = { workspace = true }
+serde = { workspace = true }
+wasi = { workspace = true }
