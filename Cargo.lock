@@ -391,6 +391,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "mknod"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "wasi_ext_lib",
+]
+
+[[package]]
 name = "mount"
 version = "0.1.0"
 dependencies = [
@@ -665,6 +673,7 @@ dependencies = [
  "imgcat",
  "kill",
  "lazy_static",
+ "mknod",
  "mount",
  "purge",
  "stty",

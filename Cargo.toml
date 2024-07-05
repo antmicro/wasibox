@@ -23,4 +23,5 @@ stty = { version = "0.1.0", package = "stty", path = "src/tools/stty" }
 mount = { version = "0.1.0", package = "mount", path = "src/tools/mount" }
 umount = { version = "0.1.0", package = "umount", path = "src/tools/umount" }
 wget = { version = "0.1.0", package = "wget", path = "src/tools/wget" }
+mknod = { version = "0.1.0", package = "mknod", path = "src/tools/mknod" }
 wasi_ext_lib = { workspace = true }
