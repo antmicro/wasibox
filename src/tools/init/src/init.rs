@@ -9,15 +9,22 @@ use std::env;
 use std::fs;
 use std::io;
 use std::io::{Read, Write};
+use std::mem;
+use std::os::fd::AsRawFd;
 
-use wasi_ext_lib::{mknod, spawn, Redirect};
+use wasi_ext_lib::{ioctl, mknod, spawn, Redirect};
 
 use serde::{Deserialize, Serialize};
 
 mod services;
 
 const FIFO_PATH: &str = "/dev/init.fifo";
+const KERNEL_FIFO_PATH_READ: &str = "/dev/initr.kfifo";
+const KERNEL_FIFO_PATH_WRITE: &str = "/dev/initw.kfifo";
 const LOG_PATH: &str = "/tmp/init.log";
+
+const TOKEN_KFIFO: u64 = 0;
+const TOKEN_UFIFO: u64 = 1;
 
 #[derive(Deserialize, Serialize)]
 struct SpawnArgs {
@@ -34,86 +41,189 @@ enum Operation {
 
 struct Init {
     pub(crate) service_manager: services::ServiceManager,
+
+    ufifo: Option<fs::File>,  // userspace fifo
+    kfifor: Option<fs::File>, // kernel read fifo
+    kfifow: Option<fs::File>, // kernel write fifo
+    logfile: Option<fs::File>,
 }
 
 impl Init {
     fn new() -> Self {
         Self {
             service_manager: services::ServiceManager::new(),
+            ufifo: None,
+            kfifor: None,
+            kfifow: None,
+            logfile: None,
+        }
+    }
+
+    fn setup_descriptors(&mut self) -> io::Result<()> {
+        let mut one = 1;
+
+        mknod(FIFO_PATH, -1).map_err(io::Error::from_raw_os_error)?;
+        mknod(KERNEL_FIFO_PATH_READ, -1).map_err(io::Error::from_raw_os_error)?;
+        mknod(KERNEL_FIFO_PATH_WRITE, -1).map_err(io::Error::from_raw_os_error)?;
+
+        self.ufifo = Some(fs::OpenOptions::new().read(true).open(FIFO_PATH)?);
+        self.kfifor = Some(
+            fs::OpenOptions::new()
+                .read(true)
+                .open(KERNEL_FIFO_PATH_READ)?,
+        );
+        ioctl(
+            self.kfifor.as_mut().unwrap().as_raw_fd(),
+            wasi_ext_lib::FIFOSKERNW,
+            Some(&mut one),
+        )
+        .map_err(io::Error::from_raw_os_error)?;
+
+        self.kfifow = Some(
+            fs::OpenOptions::new()
+                .write(true)
+                .open(KERNEL_FIFO_PATH_WRITE)?,
+        );
+        ioctl(
+            self.kfifow.as_mut().unwrap().as_raw_fd(),
+            wasi_ext_lib::FIFOSKERNR,
+            Some(&mut one),
+        )
+        .map_err(io::Error::from_raw_os_error)?;
+        self.logfile = Some(
+            fs::OpenOptions::new()
+                .create(true)
+                .write(true)
+                .truncate(true)
+                .open(LOG_PATH)?,
+        );
+
+        Ok(())
+    }
+
+    fn handle_operation(&mut self, operation: &Operation) -> io::Result<()> {
+        match operation {
+            Operation::Start(name) => {
+                if let Some(service) = self.service_manager.services.get_mut(name) {
+                    if service.pid < 0 {
+                        service.spawn()
+                    } else {
+                        Ok(()) // TODO: this should be an error
+                    }
+                } else {
+                    Err(io::Error::new(
+                        io::ErrorKind::InvalidInput,
+                        format!("Service {} not found", &name),
+                    ))
+                }
+            }
+            Operation::Stop(name) => {
+                if let Some(service) = self.service_manager.services.get(name) {
+                    if service.pid > 0 {
+                        wasi_ext_lib::kill(service.pid, wasi::SIGNAL_KILL)
+                            .map_err(io::Error::from_raw_os_error)
+                    } else {
+                        Ok(()) // TODO: this should be an error
+                    }
+                } else {
+                    Err(io::Error::new(
+                        io::ErrorKind::InvalidInput,
+                        format!("Service {} not found", &name),
+                    ))
+                }
+            }
+            Operation::Spawn(spawn_args) => {
+                let stdin_path = "/dev/spawn_stdin";
+                let stdout_path = "/dev/spawn_stdout";
+                let stderr_path = "/dev/spawn_stderr";
+
+                mknod(stdin_path, -1).map_err(io::Error::from_raw_os_error)?;
+                mknod(stdout_path, -1).map_err(io::Error::from_raw_os_error)?;
+                mknod(stderr_path, -1).map_err(io::Error::from_raw_os_error)?;
+
+                spawn(
+                    &spawn_args.cmd,
+                    &spawn_args
+                        .args
+                        .iter()
+                        .map(|arg| arg.as_str())
+                        .collect::<Vec<&str>>(),
+                    &HashMap::new(),
+                    true,
+                    &[
+                        Redirect::Read(0, String::from(stdin_path)),
+                        Redirect::Append(1, String::from(stdout_path)),
+                        Redirect::Append(2, String::from(stderr_path)),
+                    ],
+                )
+                .map_err(io::Error::from_raw_os_error)?;
+
+                Ok(())
+            }
         }
     }
 
     fn main_loop(&mut self) -> io::Result<()> {
         let mut buf = [0u8; 8192];
-
-        mknod(FIFO_PATH, -1).map_err(io::Error::from_raw_os_error)?;
-
-        let mut sock = fs::OpenOptions::new().read(true).open(FIFO_PATH)?;
-        let mut log = fs::OpenOptions::new()
-            .truncate(true)
-            .write(true)
-            .open(LOG_PATH)?;
+        let subs = [
+            wasi::Subscription {
+                userdata: TOKEN_UFIFO,
+                u: wasi::SubscriptionU {
+                    tag: wasi::EVENTTYPE_FD_READ.raw(),
+                    u: wasi::SubscriptionUU {
+                        fd_read: wasi::SubscriptionFdReadwrite {
+                            file_descriptor: self.ufifo.as_ref().unwrap().as_raw_fd() as u32,
+                        },
+                    },
+                },
+            },
+            wasi::Subscription {
+                userdata: TOKEN_KFIFO,
+                u: wasi::SubscriptionU {
+                    tag: wasi::EVENTTYPE_FD_READ.raw(),
+                    u: wasi::SubscriptionUU {
+                        fd_read: wasi::SubscriptionFdReadwrite {
+                            file_descriptor: self.kfifor.as_ref().unwrap().as_raw_fd() as u32,
+                        },
+                    },
+                },
+            },
+        ];
+        let mut events: [wasi::Event; 2] = unsafe { mem::zeroed() };
 
         loop {
-            let size = sock.read(&mut buf)?;
-            let operation = match serde_json::from_slice(&buf[..size]) {
-                Ok(v) => v,
-                Err(e) => {
-                    _ = log.write(format!("{:?}\n", e).as_bytes())?;
-                    continue;
-                }
-            };
+            let count =
+                unsafe { wasi::poll_oneoff(subs.as_ptr(), events.as_mut_ptr(), subs.len()) }
+                    .map_err(|e| io::Error::from_raw_os_error(e.raw() as i32))?;
 
-            match operation {
-                Operation::Start(name) => {
-                    let service =
-                        if let Some(service) = self.service_manager.services.get_mut(&name) {
-                            service
-                        } else {
-                            continue;
-                        };
+            if count == 0 {
+                continue;
+            }
 
-                    if service.pid < 0 {
-                        service.spawn().unwrap();
-                    }
+            for event in events[0..count].iter() {
+                let size = if event.userdata == TOKEN_KFIFO {
+                    self.kfifor.as_mut().unwrap()
+                } else {
+                    self.ufifo.as_mut().unwrap()
                 }
-                Operation::Stop(name) => {
-                    let service = if let Some(service) = self.service_manager.services.get(&name) {
-                        service
-                    } else {
+                .read(&mut buf)?;
+
+                let operation = match serde_json::from_slice(&buf[..size]) {
+                    Ok(v) => v,
+                    Err(e) => {
+                        _ = self
+                            .logfile
+                            .as_mut()
+                            .unwrap()
+                            .write(format!("{:?}\n", e).as_bytes())?;
                         continue;
-                    };
-
-                    if service.pid > 0 {
-                        wasi_ext_lib::kill(service.pid, wasi::SIGNAL_KILL)
-                            .map_err(io::Error::from_raw_os_error)?;
                     }
-                }
-                Operation::Spawn(spawn_args) => {
-                    let stdin_path = "/dev/spawn_stdin";
-                    let stdout_path = "/dev/spawn_stdout";
-                    let stderr_path = "/dev/spawn_stderr";
+                };
 
-                    mknod(stdin_path, -1).map_err(io::Error::from_raw_os_error)?;
-                    mknod(stdout_path, -1).map_err(io::Error::from_raw_os_error)?;
-                    mknod(stderr_path, -1).map_err(io::Error::from_raw_os_error)?;
+                let _ = self.handle_operation(&operation);
 
-                    spawn(
-                        &spawn_args.cmd,
-                        &spawn_args
-                            .args
-                            .iter()
-                            .map(|arg| arg.as_str())
-                            .collect::<Vec<&str>>(),
-                        &HashMap::new(),
-                        true,
-                        &[
-                            Redirect::Read(0, String::from(stdin_path)),
-                            Redirect::Append(1, String::from(stdout_path)),
-                            Redirect::Append(2, String::from(stderr_path)),
-                        ],
-                    )
-                    .map_err(io::Error::from_raw_os_error)?;
+                if event.userdata == TOKEN_KFIFO {
+                    let _ = self.kfifow.as_mut().unwrap().write(b"0");
                 }
             }
         }
@@ -122,6 +232,7 @@ impl Init {
 
 pub fn init(_args: env::Args) -> io::Result<()> {
     let mut init = Init::new();
+    init.setup_descriptors()?;
     init.service_manager.load_services()?;
     init.service_manager.spawn_services()?;
     init.main_loop()?;
