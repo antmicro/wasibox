@@ -30,6 +30,7 @@ const TOKEN_UFIFO: u64 = 1;
 struct SpawnArgs {
     cmd: String,
     args: Vec<String>,
+    kern: bool,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -101,7 +102,7 @@ impl Init {
         Ok(())
     }
 
-    fn handle_operation(&mut self, operation: &Operation) -> io::Result<()> {
+    fn handle_operation(&mut self, operation: &Operation, iteration: i32) -> io::Result<()> {
         match operation {
             Operation::Start(name) => {
                 if let Some(service) = self.service_manager.services.get_mut(name) {
@@ -133,13 +134,35 @@ impl Init {
                 }
             }
             Operation::Spawn(spawn_args) => {
-                let stdin_path = "/dev/spawn_stdin";
-                let stdout_path = "/dev/spawn_stdout";
-                let stderr_path = "/dev/spawn_stderr";
+                let paths = [
+                    format!("{}.{}", "/dev/spawn_stdin", iteration),
+                    format!("{}.{}", "/dev/spawn_stdout", iteration),
+                    format!("{}.{}", "/dev/spawn_stderr", iteration),
+                ];
 
-                mknod(stdin_path, -1).map_err(io::Error::from_raw_os_error)?;
-                mknod(stdout_path, -1).map_err(io::Error::from_raw_os_error)?;
-                mknod(stderr_path, -1).map_err(io::Error::from_raw_os_error)?;
+                paths
+                    .iter()
+                    .enumerate()
+                    .try_for_each(|(i, path)| -> io::Result<()> {
+                        mknod(path, -1).map_err(io::Error::from_raw_os_error)?;
+                        let mut one = 1;
+                        let dev = fs::OpenOptions::new().open(path)?;
+                        ioctl(dev.as_raw_fd(), wasi_ext_lib::FIFOSCLOSERM, Some(&mut one))
+                            .map_err(io::Error::from_raw_os_error)?;
+                        if spawn_args.kern {
+                            ioctl(
+                                dev.as_raw_fd(),
+                                if i == 0 {
+                                    wasi_ext_lib::FIFOSKERNW
+                                } else {
+                                    wasi_ext_lib::FIFOSKERNR
+                                },
+                                Some(&mut one),
+                            )
+                            .map_err(io::Error::from_raw_os_error)?;
+                        }
+                        Ok(())
+                    })?;
 
                 spawn(
                     &spawn_args.cmd,
@@ -151,9 +174,9 @@ impl Init {
                     &HashMap::new(),
                     true,
                     &[
-                        Redirect::Read(0, String::from(stdin_path)),
-                        Redirect::Append(1, String::from(stdout_path)),
-                        Redirect::Append(2, String::from(stderr_path)),
+                        Redirect::Read(0, paths[0].clone()),
+                        Redirect::Append(1, paths[1].clone()),
+                        Redirect::Append(2, paths[2].clone()),
                     ],
                 )
                 .map_err(io::Error::from_raw_os_error)?;
@@ -191,6 +214,7 @@ impl Init {
         ];
         let mut events: [wasi::Event; 2] = unsafe { mem::zeroed() };
 
+        let mut iteration = 0;
         loop {
             let count =
                 unsafe { wasi::poll_oneoff(subs.as_ptr(), events.as_mut_ptr(), subs.len()) }
@@ -220,11 +244,17 @@ impl Init {
                     }
                 };
 
-                let _ = self.handle_operation(&operation);
+                let _ = self.handle_operation(&operation, iteration);
 
                 if event.userdata == TOKEN_KFIFO {
-                    let _ = self.kfifow.as_mut().unwrap().write(b"0");
+                    let _ = self
+                        .kfifow
+                        .as_mut()
+                        .unwrap()
+                        .write(iteration.to_string().as_bytes());
                 }
+
+                iteration += 1;
             }
         }
     }
