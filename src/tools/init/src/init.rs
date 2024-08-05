@@ -29,6 +29,9 @@ const TOKEN_UFIFO: u64 = 1;
 #[derive(Deserialize, Serialize)]
 struct SpawnArgs {
     cmd: String,
+    stdin: Option<String>,
+    stdout: Option<String>,
+    stderr: Option<String>,
     args: Vec<String>,
     kern: bool,
 }
@@ -135,34 +138,48 @@ impl Init {
             }
             Operation::Spawn(spawn_args) => {
                 let paths = [
-                    format!("{}.{}", "/dev/spawn_stdin", iteration),
-                    format!("{}.{}", "/dev/spawn_stdout", iteration),
-                    format!("{}.{}", "/dev/spawn_stderr", iteration),
+                    (
+                        &spawn_args.stdin,
+                        format!("{}.{}", "/dev/spawn_stdin", iteration),
+                    ),
+                    (
+                        &spawn_args.stdout,
+                        format!("{}.{}", "/dev/spawn_stdout", iteration),
+                    ),
+                    (
+                        &spawn_args.stderr,
+                        format!("{}.{}", "/dev/spawn_stderr", iteration),
+                    ),
                 ];
 
-                paths
+                let redirect_paths = paths
                     .iter()
                     .enumerate()
-                    .try_for_each(|(i, path)| -> io::Result<()> {
-                        mknod(path, -1).map_err(io::Error::from_raw_os_error)?;
-                        let mut one = 1;
-                        let dev = fs::OpenOptions::new().open(path)?;
-                        ioctl(dev.as_raw_fd(), wasi_ext_lib::FIFOSCLOSERM, Some(&mut one))
-                            .map_err(io::Error::from_raw_os_error)?;
-                        if spawn_args.kern {
-                            ioctl(
-                                dev.as_raw_fd(),
-                                if i == 0 {
-                                    wasi_ext_lib::FIFOSKERNW
-                                } else {
-                                    wasi_ext_lib::FIFOSKERNR
-                                },
-                                Some(&mut one),
-                            )
-                            .map_err(io::Error::from_raw_os_error)?;
+                    .map(|(i, (override_, path))| -> io::Result<&str> {
+                        if override_.is_some() {
+                            Ok(override_.as_ref().unwrap())
+                        } else {
+                            mknod(path, -1).map_err(io::Error::from_raw_os_error)?;
+                            let mut one = 1;
+                            let dev = fs::OpenOptions::new().open(path)?;
+                            ioctl(dev.as_raw_fd(), wasi_ext_lib::FIFOSCLOSERM, Some(&mut one))
+                                .map_err(io::Error::from_raw_os_error)?;
+                            if spawn_args.kern {
+                                ioctl(
+                                    dev.as_raw_fd(),
+                                    if i == 0 {
+                                        wasi_ext_lib::FIFOSKERNW
+                                    } else {
+                                        wasi_ext_lib::FIFOSKERNR
+                                    },
+                                    Some(&mut one),
+                                )
+                                .map_err(io::Error::from_raw_os_error)?;
+                            }
+                            Ok(path)
                         }
-                        Ok(())
-                    })?;
+                    })
+                    .collect::<io::Result<Vec<&str>>>()?;
 
                 spawn(
                     &spawn_args.cmd,
@@ -174,9 +191,9 @@ impl Init {
                     &HashMap::new(),
                     true,
                     &[
-                        Redirect::Read(0, paths[0].clone()),
-                        Redirect::Append(1, paths[1].clone()),
-                        Redirect::Append(2, paths[2].clone()),
+                        Redirect::Read(0, redirect_paths[0].to_string()),
+                        Redirect::Append(1, redirect_paths[1].to_string()),
+                        Redirect::Append(2, redirect_paths[2].to_string()),
                     ],
                 )
                 .map_err(io::Error::from_raw_os_error)?;
