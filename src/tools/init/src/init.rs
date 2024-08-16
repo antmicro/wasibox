@@ -101,6 +101,24 @@ impl Init {
                 .truncate(true)
                 .open(LOG_PATH)?,
         );
+        [
+            self.logfile.as_ref().unwrap().as_raw_fd(),
+            self.ufifo.as_ref().unwrap().as_raw_fd(),
+            self.kfifor.as_ref().unwrap().as_raw_fd(),
+            self.kfifow.as_ref().unwrap().as_raw_fd(),
+        ]
+        .iter()
+        .map(|fd| -> io::Result<()> {
+            wasi_ext_lib::fcntl(
+                *fd as u32,
+                wasi_ext_lib::FcntlCommand::F_SETFD {
+                    flags: wasi_ext_lib::WASI_EXT_FDFLAG_CLOEXEC,
+                },
+            )
+            .map_err(io::Error::from_raw_os_error)?;
+            Ok(())
+        })
+        .collect::<io::Result<Vec<()>>>()?;
 
         Ok(())
     }
