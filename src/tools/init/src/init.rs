@@ -123,14 +123,19 @@ impl Init {
         Ok(())
     }
 
-    fn handle_operation(&mut self, operation: &Operation, iteration: i32) -> io::Result<()> {
+    fn handle_operation(
+        &mut self,
+        operation: &Operation,
+        iteration: i32,
+    ) -> io::Result<Option<i32>> {
         match operation {
             Operation::Start(name) => {
                 if let Some(service) = self.service_manager.services.get_mut(name) {
                     if service.pid < 0 {
-                        service.spawn()
+                        service.spawn()?;
+                        Ok(None)
                     } else {
-                        Ok(()) // TODO: this should be an error
+                        Ok(None) // TODO: this should be an error
                     }
                 } else {
                     Err(io::Error::new(
@@ -143,9 +148,10 @@ impl Init {
                 if let Some(service) = self.service_manager.services.get(name) {
                     if service.pid > 0 {
                         wasi_ext_lib::kill(service.pid, wasi::SIGNAL_KILL)
-                            .map_err(io::Error::from_raw_os_error)
+                            .map_err(io::Error::from_raw_os_error)?;
+                        Ok(None)
                     } else {
-                        Ok(()) // TODO: this should be an error
+                        Ok(None) // TODO: this should be an error
                     }
                 } else {
                     Err(io::Error::new(
@@ -199,7 +205,7 @@ impl Init {
                     })
                     .collect::<io::Result<Vec<&str>>>()?;
 
-                spawn(
+                let (_, pid) = spawn(
                     &spawn_args.cmd,
                     &spawn_args
                         .args
@@ -216,7 +222,7 @@ impl Init {
                 )
                 .map_err(io::Error::from_raw_os_error)?;
 
-                Ok(())
+                Ok(Some(pid))
             }
         }
     }
@@ -279,16 +285,23 @@ impl Init {
                     }
                 };
 
-                let _ = self.handle_operation(&operation, iteration);
-
                 if event.userdata == TOKEN_KFIFO {
-                    let _ = self
-                        .kfifow
-                        .as_mut()
-                        .unwrap()
-                        .write(iteration.to_string().as_bytes());
+                    if let Ok(p) = self.handle_operation(&operation, iteration) {
+                        if let Some(pid) = p {
+                            let _ = self
+                                .kfifow
+                                .as_mut()
+                                .unwrap()
+                                .write(format!("{} {}\n", iteration, pid).as_bytes());
+                        } else {
+                            let _ = self
+                                .kfifow
+                                .as_mut()
+                                .unwrap()
+                                .write(format!("{}\n", iteration).as_bytes());
+                        }
+                    }
                 }
-
                 iteration += 1;
             }
         }
