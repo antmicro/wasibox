@@ -27,6 +27,7 @@ lazy_static! {
         m.insert("wget", wget::wget);
         m.insert("mknod", mknod::mknod);
         m.insert("init", init::init);
+        m.insert("websocat", websocat::websocat);
         m
     };
 }

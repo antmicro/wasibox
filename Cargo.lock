@@ -736,7 +736,17 @@ dependencies = [
  "umount",
  "unzip",
  "wasi_ext_lib",
+ "websocat",
  "wget",
+]
+
+[[package]]
+name = "websocat"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "wasi 0.11.0+wasi-snapshot-preview1",
+ "wasi_ext_lib",
 ]
 
 [[package]]
