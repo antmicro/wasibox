@@ -28,6 +28,7 @@ lazy_static! {
         m.insert("mknod", mknod::mknod);
         m.insert("init", init::init);
         m.insert("websocat", websocat::websocat);
+        m.insert("uname", uname::uname);
         m
     };
 }

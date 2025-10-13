@@ -29,4 +29,5 @@ wget = { version = "0.1.0", package = "wget", path = "src/tools/wget" }
 mknod = { version = "0.1.0", package = "mknod", path = "src/tools/mknod" }
 init = { version = "0.1.0", package = "init", path = "src/tools/init" }
 websocat = { version = "0.1.0", package = "websocat", path = "src/tools/websocat" }
+uname = { version = "0.1.0", package = "uname", path = "src/tools/uname" }
 wasi_ext_lib = { workspace = true }
