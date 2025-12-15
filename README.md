@@ -14,5 +14,5 @@ After completing the previous steps, you need to define `CC` with [`WASI_SDK_PAT
 ```
 export CC="${WASI_SDK_PATH}/bin/clang --sysroot=${WASI_SDK_PATH}/share/wasi-sysroot"
 
-cargo +stage2 build --target wasm32-wasi --release
+cargo +wasi_extended build --target wasm32-wasip1 --release
 ```
