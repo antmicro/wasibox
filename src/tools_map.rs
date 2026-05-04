@@ -29,6 +29,7 @@ lazy_static! {
         m.insert("init", init::init);
         m.insert("websocat", websocat::websocat);
         m.insert("uname", uname::uname);
+        m.insert("free", free::free);
         m
     };
 }

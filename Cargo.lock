@@ -281,6 +281,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "free"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "wasi_ext_lib",
+]
+
+[[package]]
 name = "glob"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -769,6 +777,7 @@ dependencies = [
 name = "wasibox"
 version = "0.1.5"
 dependencies = [
+ "free",
  "hexdump",
  "imgcat",
  "init",
