@@ -499,6 +499,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "ps"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "wasi_ext_lib",
+]
+
+[[package]]
 name = "purge"
 version = "0.1.0"
 dependencies = [
@@ -785,6 +793,7 @@ dependencies = [
  "lazy_static",
  "mknod",
  "mount",
+ "ps",
  "purge",
  "stty",
  "tar_wasi",

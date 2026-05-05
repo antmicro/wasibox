@@ -31,4 +31,5 @@ init = { version = "0.1.0", package = "init", path = "src/tools/init" }
 websocat = { version = "0.1.0", package = "websocat", path = "src/tools/websocat" }
 uname = { version = "0.1.0", package = "uname", path = "src/tools/uname" }
 free = { version = "0.1.0", package = "free", path = "src/tools/free" }
+ps = { version = "0.1.0", package = "ps", path = "src/tools/ps" }
 wasi_ext_lib = { workspace = true }

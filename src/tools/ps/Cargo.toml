@@ -1,0 +1,11 @@
+[package]
+name = "ps"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+path = "src/ps.rs"
+
+[dependencies]
+clap = { workspace = true }
+wasi_ext_lib = { workspace = true }
