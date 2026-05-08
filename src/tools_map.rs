@@ -31,6 +31,7 @@ lazy_static! {
         m.insert("uname", uname::uname);
         m.insert("free", free::free);
         m.insert("ps", ps::ps);
+        m.insert("reset", reset::reset);
         m
     };
 }
