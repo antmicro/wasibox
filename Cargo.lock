@@ -255,7 +255,7 @@ dependencies = [
 [[package]]
 name = "filetime"
 version = "0.2.20"
-source = "git+https://github.com/antmicro/filetime?rev=e2592e883b5a4bdb0372c2084f0e07d94774615a#e2592e883b5a4bdb0372c2084f0e07d94774615a"
+source = "git+https://github.com/antmicro/filetime?rev=c73576563a30ff9ce4f5cba18cbd0a2655566265#c73576563a30ff9ce4f5cba18cbd0a2655566265"
 dependencies = [
  "cfg-if",
  "libc",
@@ -674,7 +674,7 @@ dependencies = [
 [[package]]
 name = "tar"
 version = "0.4.38"
-source = "git+https://github.com/antmicro/tar-rs?rev=1a0631d485891f3b382f0be93cfafb81f523286f#1a0631d485891f3b382f0be93cfafb81f523286f"
+source = "git+https://github.com/antmicro/tar-rs?rev=c95989e43e0fae7ddad1240ffba4aefad59e0c06#c95989e43e0fae7ddad1240ffba4aefad59e0c06"
 dependencies = [
  "filetime",
  "libc",
@@ -782,7 +782,7 @@ checksum = "ccf3ec651a847eb01de73ccad15eb7d99f80485de043efb2f370cd654f4ea44b"
 [[package]]
 name = "wasi_ext_lib"
 version = "0.1.0"
-source = "git+https://github.com/antmicro/wasi_ext_lib.git?branch=main#3a9078332d6cc08d81fb920e2105fd84987fcb0a"
+source = "git+https://github.com/antmicro/wasi_ext_lib.git?branch=main#09a6dd929012e57c09f66c9b981e406cbca40e46"
 dependencies = [
  "bindgen",
  "wasi 0.11.1+wasi-snapshot-preview1",

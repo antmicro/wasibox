@@ -7,7 +7,7 @@ edition = "2021"
 path = "src/tar_wasi.rs"
 
 [dependencies]
-tar = { git = "https://github.com/antmicro/tar-rs", rev = "1a0631d485891f3b382f0be93cfafb81f523286f" }
+tar = { git = "https://github.com/antmicro/tar-rs", rev = "c95989e43e0fae7ddad1240ffba4aefad59e0c06" }
 clap = { workspace = true }
 flate2 = "1.0.17"
 bzip2 = "0.4"
