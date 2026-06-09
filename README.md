@@ -16,3 +16,8 @@ export CC="${WASI_SDK_PATH}/bin/clang --sysroot=${WASI_SDK_PATH}/share/wasi-sysr
 
 cargo +wasi_extended build --target wasm32-wasip1 --release
 ```
+
+If you want to compile for `wasm32-wasip1-threads` instead, you need to add required flags:
+```
+RUSTFLAGS="-C target-feature=-crt-static,+atomics,+bulk-memory,+mutable-globals -C link-arg=--max-memory=4294967296" cargo +wasi_extended build --target wasm32-wasip1-threads --release
+```
