@@ -35,10 +35,6 @@ fn get_applet(args: &mut env::Args) -> Result<&AppletType, &'static str> {
 
 fn main() -> io::Result<()> {
     let mut args = env::args();
-    let _ = wasi_ext_lib::chdir(match wasi_ext_lib::getcwd() {
-        Ok(p) => p,
-        Err(_) => String::from("/"),
-    });
 
     match get_applet(&mut args) {
         Ok(applet) => applet(args),
