@@ -111,7 +111,7 @@ impl Init {
         .map(|fd| -> io::Result<()> {
             wasi_ext_lib::fcntl(
                 *fd as u32,
-                wasi_ext_lib::FcntlCommand::F_SETFD {
+                wasi_ext_lib::FcntlCommand::WASI_EXT_F_SETFD {
                     flags: wasi_ext_lib::WASI_EXT_FDFLAG_CLOEXEC,
                 },
             )
