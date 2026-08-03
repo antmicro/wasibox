@@ -1,0 +1,10 @@
+[package]
+name = "reload"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+path = "src/reload.rs"
+
+[dependencies]
+wasi_ext_lib = { workspace = true }

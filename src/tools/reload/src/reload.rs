@@ -12,7 +12,7 @@ use std::{
 
 const RESET_PATH: &str = "/proc/sys/reset";
 
-pub fn reset(_args: Args) -> io::Result<()> {
+pub fn reload(_args: Args) -> io::Result<()> {
     let mut file = OpenOptions::new().write(true).open(RESET_PATH)?;
 
     file.write_all(b"1")?;

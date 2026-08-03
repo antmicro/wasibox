@@ -561,7 +561,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7a2d987857b319362043e95f5353c0535c1f58eec5336fdfcf626430af7def58"
 
 [[package]]
-name = "reset"
+name = "reload"
 version = "0.1.0"
 dependencies = [
  "wasi_ext_lib",
@@ -802,7 +802,7 @@ dependencies = [
  "mount",
  "ps",
  "purge",
- "reset",
+ "reload",
  "stty",
  "tar_wasi",
  "tree",
