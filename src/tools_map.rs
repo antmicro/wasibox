@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2026 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -32,6 +32,7 @@ lazy_static! {
         m.insert("free", free::free);
         m.insert("ps", ps::ps);
         m.insert("reload", reload::reload);
+        m.insert("reset", reset::reset);
         m
     };
 }

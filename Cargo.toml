@@ -33,4 +33,5 @@ uname = { version = "0.1.0", package = "uname", path = "src/tools/uname" }
 free = { version = "0.1.0", package = "free", path = "src/tools/free" }
 ps = { version = "0.1.0", package = "ps", path = "src/tools/ps" }
 reload = { version = "0.1.0", package = "reload", path = "src/tools/reload" }
+reset = { version = "0.1.0", package = "reset", path = "src/tools/reset" }
 wasi_ext_lib = { workspace = true }

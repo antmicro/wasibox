@@ -568,6 +568,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "reset"
+version = "0.1.0"
+dependencies = [
+ "wasi_ext_lib",
+]
+
+[[package]]
 name = "rustc-hash"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -803,6 +810,7 @@ dependencies = [
  "ps",
  "purge",
  "reload",
+ "reset",
  "stty",
  "tar_wasi",
  "tree",
