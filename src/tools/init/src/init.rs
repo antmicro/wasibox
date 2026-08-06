@@ -33,6 +33,8 @@ struct SpawnArgs {
     stdout: Option<String>,
     stderr: Option<String>,
     args: Vec<String>,
+    #[serde(default)]
+    env: HashMap<String, String>,
     kern: bool,
 }
 
@@ -212,7 +214,7 @@ impl Init {
                         .iter()
                         .map(|arg| arg.as_str())
                         .collect::<Vec<&str>>(),
-                    &HashMap::new(),
+                    &spawn_args.env,
                     true,
                     &[
                         Redirect::Read(0, redirect_paths[0].to_string()),
