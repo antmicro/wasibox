@@ -1,1 +1,3 @@
-include: jswasi-ci-scripts@88595-add-github-act:wasibox.yml
+include:
+  - 'jswasi-ci-scripts@main:wasibox.yml'
+  - 'jswasi-ci-scripts@main:github-workflow.yml'
